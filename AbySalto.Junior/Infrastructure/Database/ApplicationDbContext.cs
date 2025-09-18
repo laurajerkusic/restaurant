@@ -28,11 +28,6 @@ namespace AbySalto.Junior.Infrastructure.Database
                 .Property(i => i.UnitPrice)
                 .HasColumnType("decimal(18,2)");
 
-            // Indeksi za učestale upite/sort
-            modelBuilder.Entity<Order>()
-                .HasIndex(o => o.CreatedAt);
-            modelBuilder.Entity<Order>()
-                .HasIndex(o => o.Status);
 
             modelBuilder.Entity<Order>()
                 .Property(o => o.Currency)

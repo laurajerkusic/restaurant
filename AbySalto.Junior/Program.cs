@@ -39,6 +39,10 @@ namespace AbySalto.Junior
                     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
                     options.RoutePrefix = string.Empty;
                 });
+
+                using var scope = app.Services.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                DbSeeder.Seed(db);
             }
 
             app.UseHttpsRedirection();
