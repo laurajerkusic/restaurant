@@ -3,6 +3,7 @@ using AbySalto.Junior.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
+
 namespace AbySalto.Junior
 {
     public class Program
@@ -12,6 +13,10 @@ namespace AbySalto.Junior
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
+
+            builder.Services.AddAuthorization();
+
+
             builder.Services.AddOpenApi();
 
             builder.Services.AddEndpointsApiExplorer();
