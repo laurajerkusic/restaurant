@@ -1,0 +1,6 @@
+@AbySalto.Junior_HostAddress = http://localhost:5074
+
+GET {{AbySalto.Junior_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
