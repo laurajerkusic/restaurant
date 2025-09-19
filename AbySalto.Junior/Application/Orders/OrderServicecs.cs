@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AbySalto.Junior.Application.Orders
 {
-   
     public class OrderService : IOrderService
     {
         private readonly IApplicationDbContext _db;
@@ -16,12 +15,23 @@ namespace AbySalto.Junior.Application.Orders
             _db = db;
         }
 
-        // LISTA 
-        public async Task<List<OrderReadDto>> GetAllAsync(CancellationToken ct)
+        private static IQueryable<Order> ApplySort(IQueryable<Order> q, string? sort)
         {
-            return await _db.Orders
-                .AsNoTracking()
-                .OrderByDescending(o => o.CreatedAt) // default sortiranje (možeš i maknuti)
+            return sort switch
+            {
+                "total_asc" => q.OrderBy(o => o.Items.Sum(i => i.UnitPrice * i.Quantity)),
+                "total_desc" => q.OrderByDescending(o => o.Items.Sum(i => i.UnitPrice * i.Quantity)),
+                _ => q.OrderByDescending(o => o.Id)
+            };
+        }
+
+        // LISTA (bez paginacije) 
+        public async Task<List<OrderReadDto>> GetAllAsync(string? sort, CancellationToken ct)
+        {
+            var q = _db.Orders.AsNoTracking();
+            q = ApplySort(q, sort);
+
+            return await q
                 .Select(o => new OrderReadDto(
                     o.Id,
                     o.CustomerName,
@@ -40,18 +50,18 @@ namespace AbySalto.Junior.Application.Orders
                 .ToListAsync(ct);
         }
 
-        public async Task<PagedResult<OrderReadDto>> GetAllPagedAsync(int page, int pageSize, CancellationToken ct)
+        // LISTA (paginirano)
+        public async Task<PagedResult<OrderReadDto>> GetAllPagedAsync(int page, int pageSize, string? sort, CancellationToken ct)
         {
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 200) pageSize = 20;
 
-            var query = _db.Orders
-                .AsNoTracking()
-                .OrderByDescending(o => o.CreatedAt); // ili po totalu, po želji
+            var q = _db.Orders.AsNoTracking();
+            q = ApplySort(q, sort); 
 
-            var total = await query.CountAsync(ct);
+            var total = await q.CountAsync(ct);
 
-            var items = await query
+            var items = await q
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(o => new OrderReadDto(
@@ -79,6 +89,7 @@ namespace AbySalto.Junior.Application.Orders
                 PageSize = pageSize
             };
         }
+
         // DETALJ po Id-u
         public async Task<OrderReadDto?> GetByIdAsync(int id, CancellationToken ct)
         {
@@ -96,26 +107,20 @@ namespace AbySalto.Junior.Application.Orders
                     o.Currency,
                     o.Items.Sum(i => i.UnitPrice * i.Quantity),
                     o.Items.Select(i => new OrderReadItemDto(
-                        i.Id,
-                        i.ProductName,
-                        i.Quantity,
-                        i.UnitPrice,
-                        i.UnitPrice * i.Quantity
+                        i.Id, i.ProductName, i.Quantity, i.UnitPrice, i.UnitPrice * i.Quantity
                     )).ToList()
                 ))
                 .SingleOrDefaultAsync(ct);
 
-            return dto; 
+            return dto;
         }
 
-        // KREIRAJ novu narudžbu
+        // KREIRAJ
         public async Task<OrderReadDto> CreateAsync(OrderCreateDto dto, CancellationToken ct)
         {
-           
             if (dto.Items == null || dto.Items.Count == 0)
                 throw new ArgumentException("Order must contain at least one item.");
 
-          
             var order = new Order
             {
                 CustomerName = dto.CustomerName,
@@ -137,7 +142,6 @@ namespace AbySalto.Junior.Application.Orders
             _db.Orders.Add(order);
             await _db.SaveChangesAsync(ct);
 
-            // pročitaj natrag kao DTO 
             var created = await GetByIdAsync(order.Id, ct);
             return created!;
         }
@@ -159,9 +163,7 @@ namespace AbySalto.Junior.Application.Orders
             var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (order == null) return false;
 
-          
             _db.Orders.Remove(order);
-
             await _db.SaveChangesAsync(ct);
             return true;
         }
