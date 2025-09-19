@@ -2,6 +2,8 @@
 using AbySalto.Junior.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using AbySalto.Junior.Application.Orders;
+
 
 
 namespace AbySalto.Junior
@@ -13,6 +15,9 @@ namespace AbySalto.Junior
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
+
+            builder.Services.AddScoped<IOrderService, OrderService>();
+
 
             builder.Services.AddAuthorization();
 

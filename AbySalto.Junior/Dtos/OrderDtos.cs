@@ -4,21 +4,24 @@ using AbySalto.Junior.Models;
 namespace AbySalto.Junior.Dtos;
 
 // CREATE 
-public record OrderItemCreateDto(
-    [property: Required, StringLength(120)] string ProductName,
-    [property: Range(1, int.MaxValue)] int Quantity,
-    [property: Range(0, 1_000_000)] decimal UnitPrice
-);
+public class OrderItemCreateDto
+{
+    [Required, StringLength(120)] public string ProductName { get; set; } = "";
+    [Range(1, int.MaxValue)] public int Quantity { get; set; }
+    [Range(0, 1_000_000)] public decimal UnitPrice { get; set; }
+}
 
-public record OrderCreateDto(
-    [property: Required, StringLength(120)] string CustomerName,
-    [property: Phone, StringLength(40)] string? Phone,
-    [property: StringLength(200)] string? DeliveryAddress,
-    [property: StringLength(500)] string? Note,
-    [property: Required] PaymentMethod PaymentMethod,
-    [property: Required, StringLength(3)] string Currency,
-    [property: Required] List<OrderItemCreateDto> Items
-);
+public class OrderCreateDto
+{
+    [Required, StringLength(120)] public string CustomerName { get; set; } = "";
+    [Phone, StringLength(40)] public string? Phone { get; set; }
+    [StringLength(200)] public string? DeliveryAddress { get; set; }
+    [StringLength(500)] public string? Note { get; set; }
+    [Required] public PaymentMethod PaymentMethod { get; set; }
+    [Required, StringLength(3)] public string Currency { get; set; } = "EUR";
+    [Required] public List<OrderItemCreateDto> Items { get; set; } = new();
+}
+
 
 //  READ 
 public record OrderReadItemDto(
@@ -44,4 +47,9 @@ public record OrderReadDto(
 );
 
 // UPDATE STATUS 
-public record OrderUpdateStatusDto([property: Required] OrderStatus Status);
+public class OrderUpdateStatusDto
+{
+    [Required]
+    public OrderStatus Status { get; set; }
+}
+
