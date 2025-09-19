@@ -16,6 +16,9 @@ namespace AbySalto.Junior
 
             builder.Services.AddControllers();
 
+            builder.Services.AddAutoMapper(typeof(Program));
+
+
             builder.Services.AddScoped<IOrderService, OrderService>();
 
 

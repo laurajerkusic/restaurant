@@ -3,18 +3,23 @@ using AbySalto.Junior.Dtos;
 using AbySalto.Junior.Infrastructure.Database;
 using AbySalto.Junior.Models;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace AbySalto.Junior.Application.Orders
 {
     public class OrderService : IOrderService
     {
         private readonly IApplicationDbContext _db;
+        private readonly IMapper _mapper;
 
-        public OrderService(IApplicationDbContext db)
+        public OrderService(IApplicationDbContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
+       
         private static IQueryable<Order> ApplySort(IQueryable<Order> q, string? sort)
         {
             return sort switch
@@ -25,32 +30,19 @@ namespace AbySalto.Junior.Application.Orders
             };
         }
 
-        // LISTA (bez paginacije) 
+        // LISTA (bez paginacije)
         public async Task<List<OrderReadDto>> GetAllAsync(string? sort, CancellationToken ct)
         {
             var q = _db.Orders.AsNoTracking();
             q = ApplySort(q, sort);
 
+         
             return await q
-                .Select(o => new OrderReadDto(
-                    o.Id,
-                    o.CustomerName,
-                    o.Phone,
-                    o.DeliveryAddress,
-                    o.Note,
-                    o.CreatedAt,
-                    o.Status,
-                    o.PaymentMethod,
-                    o.Currency,
-                    o.Items.Sum(i => i.UnitPrice * i.Quantity),
-                    o.Items.Select(i => new OrderReadItemDto(
-                        i.Id, i.ProductName, i.Quantity, i.UnitPrice, i.UnitPrice * i.Quantity
-                    )).ToList()
-                ))
+                .ProjectTo<OrderReadDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(ct);
         }
 
-        // LISTA (paginirano)
+        // LISTA (paginirano) + opcionalni sort
         public async Task<PagedResult<OrderReadDto>> GetAllPagedAsync(int page, int pageSize, string? sort, CancellationToken ct)
         {
             if (page < 1) page = 1;
@@ -64,21 +56,7 @@ namespace AbySalto.Junior.Application.Orders
             var items = await q
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(o => new OrderReadDto(
-                    o.Id,
-                    o.CustomerName,
-                    o.Phone,
-                    o.DeliveryAddress,
-                    o.Note,
-                    o.CreatedAt,
-                    o.Status,
-                    o.PaymentMethod,
-                    o.Currency,
-                    o.Items.Sum(i => i.UnitPrice * i.Quantity),
-                    o.Items.Select(i => new OrderReadItemDto(
-                        i.Id, i.ProductName, i.Quantity, i.UnitPrice, i.UnitPrice * i.Quantity
-                    )).ToList()
-                ))
+                .ProjectTo<OrderReadDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(ct);
 
             return new PagedResult<OrderReadDto>
@@ -93,26 +71,10 @@ namespace AbySalto.Junior.Application.Orders
         // DETALJ po Id-u
         public async Task<OrderReadDto?> GetByIdAsync(int id, CancellationToken ct)
         {
-            var dto = await _db.Orders.AsNoTracking()
+            return await _db.Orders.AsNoTracking()
                 .Where(o => o.Id == id)
-                .Select(o => new OrderReadDto(
-                    o.Id,
-                    o.CustomerName,
-                    o.Phone,
-                    o.DeliveryAddress,
-                    o.Note,
-                    o.CreatedAt,
-                    o.Status,
-                    o.PaymentMethod,
-                    o.Currency,
-                    o.Items.Sum(i => i.UnitPrice * i.Quantity),
-                    o.Items.Select(i => new OrderReadItemDto(
-                        i.Id, i.ProductName, i.Quantity, i.UnitPrice, i.UnitPrice * i.Quantity
-                    )).ToList()
-                ))
+                .ProjectTo<OrderReadDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync(ct);
-
-            return dto;
         }
 
         // KREIRAJ
@@ -121,29 +83,23 @@ namespace AbySalto.Junior.Application.Orders
             if (dto.Items == null || dto.Items.Count == 0)
                 throw new ArgumentException("Order must contain at least one item.");
 
-            var order = new Order
-            {
-                CustomerName = dto.CustomerName,
-                Phone = dto.Phone,
-                DeliveryAddress = dto.DeliveryAddress,
-                Note = dto.Note,
-                PaymentMethod = dto.PaymentMethod,
-                Currency = dto.Currency,
-                Status = OrderStatus.Pending,
-                CreatedAt = DateTime.UtcNow,
-                Items = dto.Items.Select(i => new OrderItem
-                {
-                    ProductName = i.ProductName,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                }).ToList()
-            };
+            // DTO -> Entity
+            var order = _mapper.Map<Order>(dto);
+
+          
+            if (order.CreatedAt == default) order.CreatedAt = DateTime.UtcNow;
+            if (order.Status == default) order.Status = OrderStatus.Pending;
 
             _db.Orders.Add(order);
             await _db.SaveChangesAsync(ct);
 
-            var created = await GetByIdAsync(order.Id, ct);
-            return created!;
+            // Vrati DTO iz baze 
+            var created = await _db.Orders.AsNoTracking()
+                .Where(o => o.Id == order.Id)
+                .ProjectTo<OrderReadDto>(_mapper.ConfigurationProvider)
+                .SingleAsync(ct);
+
+            return created;
         }
 
         // PROMJENA STATUSA
