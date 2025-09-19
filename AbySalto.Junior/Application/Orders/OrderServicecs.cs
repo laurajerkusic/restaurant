@@ -39,6 +39,46 @@ namespace AbySalto.Junior.Application.Orders
                 ))
                 .ToListAsync(ct);
         }
+
+        public async Task<PagedResult<OrderReadDto>> GetAllPagedAsync(int page, int pageSize, CancellationToken ct)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 200) pageSize = 20;
+
+            var query = _db.Orders
+                .AsNoTracking()
+                .OrderByDescending(o => o.CreatedAt); // ili po totalu, po želji
+
+            var total = await query.CountAsync(ct);
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(o => new OrderReadDto(
+                    o.Id,
+                    o.CustomerName,
+                    o.Phone,
+                    o.DeliveryAddress,
+                    o.Note,
+                    o.CreatedAt,
+                    o.Status,
+                    o.PaymentMethod,
+                    o.Currency,
+                    o.Items.Sum(i => i.UnitPrice * i.Quantity),
+                    o.Items.Select(i => new OrderReadItemDto(
+                        i.Id, i.ProductName, i.Quantity, i.UnitPrice, i.UnitPrice * i.Quantity
+                    )).ToList()
+                ))
+                .ToListAsync(ct);
+
+            return new PagedResult<OrderReadDto>
+            {
+                Items = items,
+                TotalCount = total,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
         // DETALJ po Id-u
         public async Task<OrderReadDto?> GetByIdAsync(int id, CancellationToken ct)
         {

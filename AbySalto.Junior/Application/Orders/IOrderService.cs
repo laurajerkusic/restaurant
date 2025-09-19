@@ -10,4 +10,6 @@ public interface IOrderService
     Task<OrderReadDto> CreateAsync(OrderCreateDto dto, CancellationToken ct);
     Task<bool> UpdateStatusAsync(int id, OrderStatus status, CancellationToken ct);
     Task<bool> DeleteAsync(int id, CancellationToken ct);
+
+    Task<PagedResult<OrderReadDto>> GetAllPagedAsync(int page, int pageSize, CancellationToken ct);
 }

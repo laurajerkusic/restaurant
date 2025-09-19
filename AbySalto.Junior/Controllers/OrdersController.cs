@@ -16,6 +16,13 @@ public class OrdersController : ControllerBase
     public Task<List<OrderReadDto>> GetAll(CancellationToken ct = default)
      => _svc.GetAllAsync(ct);
 
+    [HttpGet("paged")]
+    public Task<PagedResult<OrderReadDto>> GetAllPaged(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20,
+    CancellationToken ct = default)
+    => _svc.GetAllPagedAsync(page, pageSize, ct);
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<OrderReadDto>> GetById(int id, CancellationToken ct)
         => (await _svc.GetByIdAsync(id, ct)) is { } dto ? Ok(dto) : NotFound();
