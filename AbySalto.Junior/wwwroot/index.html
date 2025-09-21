@@ -6,16 +6,16 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
 
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/morph/bootstrap.min.css">
 
 
     <link rel="stylesheet" href="css/site.css?v=1">
 
-   
+
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-  
+
 </head>
 <body class="container my-4">
     <h1 class="h3 mb-4">Restaurant</h1>
@@ -117,7 +117,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Quantity</label>
-                    <input id="qty" type="number" min="1" class="form-control" >
+                    <input id="qty" type="number" min="1" class="form-control">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Unit price</label>
@@ -242,36 +242,36 @@
 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-            <td>${o.id}</td>
-            <td>
-              <div class="fw-semibold">${o.customerName ?? ""}</div>
-              <div class="small text-muted">${o.phone ?? ""}</div>
-              <div class="small text-muted">${o.deliveryAddress ?? ""}</div>
-            </td>
-            <td><span class="badge ${badgeClass(o.status)}">${StatusText[o.status] ?? o.status}</span></td>
-            <td>${o.createdAt ? new Date(o.createdAt).toLocaleString() : ""}</td>
-            <td class="fw-semibold">${formatCurrency(o.total ?? 0, o.currency ?? "EUR")}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
-                Details
-              </button>
-            </td>
-          `;
+                <td>${o.id}</td>
+                <td>
+                  <div class="fw-semibold">${o.customerName ?? ""}</div>
+                  <div class="small text-muted">${o.phone ?? ""}</div>
+                  <div class="small text-muted">${o.deliveryAddress ?? ""}</div>
+                </td>
+                <td><span class="badge ${badgeClass(o.status)}">${StatusText[o.status] ?? o.status}</span></td>
+                <td>${o.createdAt ? new Date(o.createdAt).toLocaleString() : ""}</td>
+                <td class="fw-semibold">${formatCurrency(o.total ?? 0, o.currency ?? "EUR")}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+                    Details
+                  </button>
+                </td>
+              `;
                 tbody.appendChild(tr);
 
                 const trItems = document.createElement("tr");
                 const td = document.createElement("td");
                 td.colSpan = 6;
                 td.innerHTML = `
-            <div id="${collapseId}" class="collapse">
-              <div class="p-3 border rounded">
-                <div class="fw-semibold mb-2">Items</div>
-                ${renderItemsTable(o.items || [])}
-                <div class="small text-muted mt-2">Currency: ${o.currency ?? "EUR"}</div>
-                ${o.note ? `<div class="small text-muted">Note: ${o.note}</div>` : ""}
-              </div>
-            </div>
-          `;
+                <div id="${collapseId}" class="collapse">
+                  <div class="p-3 border rounded">
+                    <div class="fw-semibold mb-2">Items</div>
+                    ${renderItemsTable(o.items || [])}
+                    <div class="small text-muted mt-2">Currency: ${o.currency ?? "EUR"}</div>
+                    ${o.note ? `<div class="small text-muted">Note: ${o.note}</div>` : ""}
+                  </div>
+                </div>
+              `;
                 trItems.appendChild(td);
                 tbody.appendChild(trItems);
             }
@@ -287,27 +287,27 @@
         function renderItemsTable(items) {
             if (!items.length) return `<div class="text-muted">No items</div>`;
             const rows = items.map(i => `
-          <tr>
-            <td>${i.productName}</td>
-            <td class="text-end">${i.quantity}</td>
-            <td class="text-end">${i.unitPrice}</td>
-            <td class="text-end">${i.lineTotal}</td>
-          </tr>
-        `).join("");
+              <tr>
+                <td>${i.productName}</td>
+                <td class="text-end">${i.quantity}</td>
+                <td class="text-end">${i.unitPrice}</td>
+                <td class="text-end">${i.lineTotal}</td>
+              </tr>
+            `).join("");
             return `
-          <div class="table-responsive">
-            <table class="table table-sm table-items">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th class="text-end">Qty</th>
-                  <th class="text-end">Price</th>
-                  <th class="text-end">Total price</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>`;
+              <div class="table-responsive">
+                <table class="table table-sm table-items">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th class="text-end">Qty</th>
+                      <th class="text-end">Price</th>
+                      <th class="text-end">Total price</th>
+                    </tr>
+                  </thead>
+                  <tbody>${rows}</tbody>
+                </table>
+              </div>`;
         }
 
         // ----- draft items (Create) -----
@@ -320,14 +320,14 @@
                 sum += line;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-            <td>${it.productName}</td>
-            <td class="text-end">${it.quantity}</td>
-            <td class="text-end">${it.unitPrice.toFixed(2)}</td>
-            <td class="text-end">${line.toFixed(2)}</td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${idx})">Remove</button>
-            </td>
-          `;
+                <td>${it.productName}</td>
+                <td class="text-end">${it.quantity}</td>
+                <td class="text-end">${it.unitPrice.toFixed(2)}</td>
+                <td class="text-end">${line.toFixed(2)}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${idx})">Remove</button>
+                </td>
+              `;
                 tbody.appendChild(tr);
             });
             document.getElementById('draftTotal').textContent = sum.toFixed(2);
@@ -479,6 +479,6 @@
         renderDraftItems();
         refresh();
     </script>
- 
+
 </body>
 </html>
