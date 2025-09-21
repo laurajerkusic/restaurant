@@ -1,0 +1,484 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Restaurant</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/morph/bootstrap.min.css">
+
+
+    <link rel="stylesheet" href="css/site.css?v=1">
+
+   
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  
+</head>
+<body class="container my-4">
+    <h1 class="h3 mb-4">Restaurant</h1>
+
+    <!-- LIST + PAGINATION -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">List</div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-3">
+                    <label for="sort" class="form-label">Sort</label>
+                    <select id="sort" class="form-select">
+                        <option value="">None</option>
+                        <option value="total_desc">Total desc</option>
+                        <option value="total_asc">Total asc</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label for="pageSize" class="form-label">Page size</label>
+                    <input id="pageSize" type="number" class="form-control" min="1" step="1" value="10">
+                </div>
+                <div class="col-sm-6 d-flex flex-wrap gap-2 align-items-end">
+                    <button type="button" class="btn btn-outline-secondary" onclick="goPrev()">Prev</button>
+                    <div class="input-group" style="width: 220px;">
+                        <span class="input-group-text">Page</span>
+                        <input id="gotoPage" type="number" class="form-control" min="1" step="1" value="1">
+                        <button type="button" class="btn btn-outline-secondary" onclick="goTo()">Go</button>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary" onclick="goNext()">Next</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="refresh()">Refresh</button>
+                </div>
+            </div>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width:80px;">ID</th>
+                            <th>Customer</th>
+                            <th style="width:140px;">Status</th>
+                            <th style="width:220px;">Created</th>
+                            <th style="width:140px;">Total</th>
+                            <th style="width:120px;">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersBody"></tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="muted" id="pageInfo"></div>
+                <div class="muted" id="totalInfo"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">Create order</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Name</label>
+                    <input id="name" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Phone</label>
+                    <input id="phone" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Payment method</label>
+                    <select id="pay" class="form-select">
+                        <option value="0">Cash</option>
+                        <option value="1">Card</option>
+                        <option value="2">Online</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Address</label>
+                    <input id="addr" class="form-control">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Note</label>
+                    <input id="note" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Currency</label>
+                    <input id="cur" class="form-control" value="EUR">
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- ITEMS BUILDER -->
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label">Item name</label>
+                    <input id="prod" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Quantity</label>
+                    <input id="qty" type="number" min="1" class="form-control" >
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Unit price</label>
+                    <input id="price" type="number" step="0.01" class="form-control">
+                </div>
+                <div class="col-12">
+                    <button type="button" class="btn btn-outline-primary" onclick="addItem()">Add item</button>
+                </div>
+            </div>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-items">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Total price</th>
+                            <th style="width:80px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="draftItemsBody"></tbody>
+                </table>
+            </div>
+            <div class="text-end muted">Draft total: <span id="draftTotal">0</span></div>
+
+            <div class="mt-3">
+                <button type="button" class="btn btn-primary" onclick="createOrder()">Create</button>
+                <span id="createMsg" class="ms-2"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHANGE STATUS -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Change status</div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Order Id</label>
+                    <input id="oid-status" type="number" min="1" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">New status</label>
+                    <select id="status" class="form-select">
+                        <option value="0">Pending</option>
+                        <option value="1">InProgress</option>
+                        <option value="2">Completed</option>
+                        <option value="3">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-warning" onclick="updateStatus()">Update status</button>
+                </div>
+                <div class="col">
+                    <span id="opMsgStatus"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="card mb-5">
+        <div class="card-header bg-danger text-white">Delete order</div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Order Id</label>
+                    <input id="oid-delete" type="number" min="1" class="form-control">
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger" onclick="deleteOrder()">Delete</button>
+                </div>
+                <div class="col">
+                    <span id="opMsgDelete"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ----- state -----
+        let currentPage = 1;
+        let pageSize = 10;
+        let currentSort = "";
+        let totalCount = 0;
+
+        // draft items for Create
+        let draftItems = [];
+
+        const StatusText = ["Pending", "InProgress", "Completed", "Cancelled"];
+
+        // ----- helpers -----
+        function formatCurrency(amount, currency) {
+            try { return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount); }
+            catch { return `${amount} ${currency}`; }
+        }
+        function setText(id, text) { document.getElementById(id).textContent = text; }
+        function badgeClass(status) {
+            switch (status) {
+                case 0: return "text-bg-secondary";
+                case 1: return "text-bg-info";
+                case 2: return "text-bg-success";
+                case 3: return "text-bg-danger";
+                default: return "text-bg-secondary";
+            }
+        }
+        function totalPages() {
+            return Math.max(1, Math.ceil((totalCount || 0) / (pageSize || 1)));
+        }
+
+        // ----- render list -----
+        function renderOrders(data) {
+            const tbody = document.getElementById("ordersBody");
+            tbody.innerHTML = "";
+
+            const items = data.items || [];
+            totalCount = data.totalCount ?? items.length;
+
+            for (const o of items) {
+                const collapseId = `items-${o.id}`;
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+            <td>${o.id}</td>
+            <td>
+              <div class="fw-semibold">${o.customerName ?? ""}</div>
+              <div class="small text-muted">${o.phone ?? ""}</div>
+              <div class="small text-muted">${o.deliveryAddress ?? ""}</div>
+            </td>
+            <td><span class="badge ${badgeClass(o.status)}">${StatusText[o.status] ?? o.status}</span></td>
+            <td>${o.createdAt ? new Date(o.createdAt).toLocaleString() : ""}</td>
+            <td class="fw-semibold">${formatCurrency(o.total ?? 0, o.currency ?? "EUR")}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+                Details
+              </button>
+            </td>
+          `;
+                tbody.appendChild(tr);
+
+                const trItems = document.createElement("tr");
+                const td = document.createElement("td");
+                td.colSpan = 6;
+                td.innerHTML = `
+            <div id="${collapseId}" class="collapse">
+              <div class="p-3 border rounded">
+                <div class="fw-semibold mb-2">Items</div>
+                ${renderItemsTable(o.items || [])}
+                <div class="small text-muted mt-2">Currency: ${o.currency ?? "EUR"}</div>
+                ${o.note ? `<div class="small text-muted">Note: ${o.note}</div>` : ""}
+              </div>
+            </div>
+          `;
+                trItems.appendChild(td);
+                tbody.appendChild(trItems);
+            }
+
+            const tp = totalPages();
+            const start = (currentPage - 1) * pageSize + 1;
+            const end = Math.min(currentPage * pageSize, totalCount);
+            setText("pageInfo", totalCount ? `Page ${currentPage} / ${tp}` : "No data");
+            setText("totalInfo", totalCount ? `Showing ${start}-${end} of ${totalCount}` : "");
+            document.getElementById("gotoPage").value = currentPage;
+        }
+
+        function renderItemsTable(items) {
+            if (!items.length) return `<div class="text-muted">No items</div>`;
+            const rows = items.map(i => `
+          <tr>
+            <td>${i.productName}</td>
+            <td class="text-end">${i.quantity}</td>
+            <td class="text-end">${i.unitPrice}</td>
+            <td class="text-end">${i.lineTotal}</td>
+          </tr>
+        `).join("");
+            return `
+          <div class="table-responsive">
+            <table class="table table-sm table-items">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th class="text-end">Qty</th>
+                  <th class="text-end">Price</th>
+                  <th class="text-end">Total price</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+        }
+
+        // ----- draft items (Create) -----
+        function renderDraftItems() {
+            const tbody = document.getElementById('draftItemsBody');
+            tbody.innerHTML = '';
+            let sum = 0;
+            draftItems.forEach((it, idx) => {
+                const line = it.quantity * it.unitPrice;
+                sum += line;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+            <td>${it.productName}</td>
+            <td class="text-end">${it.quantity}</td>
+            <td class="text-end">${it.unitPrice.toFixed(2)}</td>
+            <td class="text-end">${line.toFixed(2)}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${idx})">Remove</button>
+            </td>
+          `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('draftTotal').textContent = sum.toFixed(2);
+        }
+
+        function addItem() {
+            const name = document.getElementById('prod').value.trim();
+            const qty = Number(document.getElementById('qty').value);
+            const up = Number(document.getElementById('price').value);
+            if (!name || !qty || qty < 1 || !isFinite(up) || up < 0) {
+                alert('Please enter valid product, quantity and unit price.');
+                return;
+            }
+            draftItems.push({ productName: name, quantity: qty, unitPrice: up });
+            document.getElementById('prod').value = '';
+            document.getElementById('qty').value = 1;
+            document.getElementById('price').value = 0;
+            renderDraftItems();
+        }
+
+        function removeItem(index) {
+            draftItems.splice(index, 1);
+            renderDraftItems();
+        }
+
+        // ----- API calls -----
+        async function fetchPaged() {
+            const params = new URLSearchParams();
+            params.set("page", currentPage);
+            params.set("pageSize", pageSize);
+            if (currentSort) params.set("sort", currentSort);
+
+            const res = await fetch(`/api/Orders/paged?${params.toString()}`);
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        }
+
+        async function refresh() {
+            try {
+                currentSort = document.getElementById("sort").value;
+                pageSize = Math.max(1, Number(document.getElementById("pageSize").value) || 10);
+
+                if (totalCount > 0) {
+                    const tp = totalPages();
+                    if (currentPage > tp) currentPage = tp;
+                    if (currentPage < 1) currentPage = 1;
+                }
+
+                const data = await fetchPaged();
+                const tp = Math.max(1, Math.ceil((data.totalCount || 0) / pageSize));
+                if (currentPage > tp) {
+                    currentPage = tp;
+                    const data2 = await fetchPaged();
+                    renderOrders(data2);
+                } else {
+                    renderOrders(data);
+                }
+            } catch (e) {
+                alert("Error loading orders: " + e.message);
+            }
+        }
+
+        // ----- pagination controls -----
+        function goPrev() { if (currentPage > 1) { currentPage--; refresh(); } }
+        function goNext() { const tp = totalPages(); if (currentPage < tp) { currentPage++; refresh(); } }
+        function goTo() {
+            const n = Number(document.getElementById("gotoPage").value) || 1;
+            const tp = totalPages();
+            currentPage = Math.min(Math.max(1, n), tp);
+            refresh();
+        }
+
+        // ----- create / update / delete -----
+        async function createOrder() {
+            if (draftItems.length === 0) {
+                alert('Please add at least one item.');
+                return;
+            }
+            const dto = {
+                customerName: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                deliveryAddress: document.getElementById('addr').value,
+                note: document.getElementById('note').value,
+                paymentMethod: Number(document.getElementById('pay').value),
+                currency: document.getElementById('cur').value || "EUR",
+                items: draftItems.map(i => ({ productName: i.productName, quantity: i.quantity, unitPrice: i.unitPrice }))
+            };
+
+            const msg = document.getElementById('createMsg');
+            msg.className = "text-muted"; msg.textContent = "Sending...";
+            try {
+                const res = await fetch('/api/Orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dto)
+                });
+                if (!res.ok) throw new Error(await res.text());
+                msg.className = "text-success"; msg.textContent = "Created";
+                draftItems = []; renderDraftItems();
+                document.getElementById('name').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('addr').value = '';
+                document.getElementById('note').value = '';
+                document.getElementById('cur').value = 'EUR';
+                refresh();
+            } catch (e) {
+                msg.className = "text-danger"; msg.textContent = "Error: " + e.message;
+            }
+        }
+
+        async function updateStatus() {
+            const id = Number(document.getElementById('oid-status').value);
+            const status = Number(document.getElementById('status').value);
+            const msg = document.getElementById('opMsgStatus');
+            msg.className = "text-muted"; msg.textContent = "Sending...";
+            try {
+                const res = await fetch(`/api/Orders/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                msg.className = "text-success"; msg.textContent = "Status updated";
+                refresh();
+            } catch (e) {
+                msg.className = "text-danger"; msg.textContent = "Error: " + e.message;
+            }
+        }
+
+        async function deleteOrder() {
+            const id = Number(document.getElementById('oid-delete').value);
+            const msg = document.getElementById('opMsgDelete');
+            msg.className = "text-muted"; msg.textContent = "Deleting...";
+            try {
+                const res = await fetch(`/api/Orders/${id}`, { method: 'DELETE' });
+                if (!res.ok && res.status !== 204) throw new Error(await res.text());
+                msg.className = "text-success"; msg.textContent = "Deleted";
+                refresh();
+            } catch (e) {
+                msg.className = "text-danger"; msg.textContent = "Error: " + e.message;
+            }
+        }
+
+        // initial load + reactive filters
+        document.getElementById("sort").addEventListener("change", () => { currentPage = 1; refresh(); });
+        document.getElementById("pageSize").addEventListener("change", () => { currentPage = 1; refresh(); });
+        document.getElementById("gotoPage").addEventListener("keydown", e => { if (e.key === 'Enter') goTo(); });
+
+        renderDraftItems();
+        refresh();
+    </script>
+ 
+</body>
+</html>

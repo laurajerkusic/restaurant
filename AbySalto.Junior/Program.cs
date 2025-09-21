@@ -14,6 +14,7 @@ namespace AbySalto.Junior
         {
             var builder = WebApplication.CreateBuilder(args);
 
+
             builder.Services.AddControllers();
 
             builder.Services.AddAutoMapper(typeof(Program));
@@ -36,16 +37,25 @@ namespace AbySalto.Junior
             builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+
             var app = builder.Build();
+
+            app.UseDefaultFiles();
+
+            app.UseStaticFiles();
+
+            app.MapControllers();
 
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+               
                 app.UseSwagger();
                 app.UseSwaggerUI(options =>
                 {
                     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-                    options.RoutePrefix = string.Empty;
+                    options.RoutePrefix = "swagger";
                 });
 
                 using var scope = app.Services.CreateScope();

@@ -1,0 +1,138 @@
+﻿
+:root {
+    --purple: #756AB6; /* tamno ljubičasta (glavna) */
+    --lilac: #AC87C5; /* lila (sekundarna) */
+    --purple-h: #695CA5; /* hover tamnija */
+    --purple-a: #5E5196; /* active najtamnija */
+    --lilac-h: #9C75B7;
+    --lilac-a: #8C63A9;
+}
+
+
+.table thead.table-dark,
+table thead.table-dark,
+.table-dark,
+.table-dark > tr > th,
+.table thead.table-dark th {
+    background-image: linear-gradient(90deg, var(--purple-a), var(--purple)) !important;
+    background-color: var(--purple) !important;
+    color: #fff !important;
+    border-color: rgba(255,255,255,.15) !important;
+}
+
+
+.btn {
+    border-width: 2px;
+    border-radius: .6rem;
+}
+
+/* PRIMARY = tamno ljubičasta  */
+.btn-primary,
+.btn-outline-primary {
+    color: #fff !important;
+    background-color: var(--purple) !important;
+    border-color: var(--purple) !important;
+}
+
+    .btn-primary:hover,
+    .btn-outline-primary:hover {
+        background-color: var(--purple-h) !important;
+        border-color: var(--purple-h) !important;
+    }
+
+    .btn-primary:active,
+    .btn-outline-primary:active,
+    .btn-primary:focus,
+    .btn-outline-primary:focus {
+        background-color: var(--purple-a) !important;
+        border-color: var(--purple-a) !important;
+        box-shadow: 0 0 0 .2rem rgba(117,106,182,.25) !important;
+    }
+
+/* SECONDARY = lila  */
+.btn-secondary,
+.btn-outline-secondary {
+    color: #fff !important;
+    background-color: var(--lilac) !important;
+    border-color: var(--lilac) !important;
+}
+
+    .btn-secondary:hover,
+    .btn-outline-secondary:hover {
+        background-color: var(--lilac-h) !important;
+        border-color: var(--lilac-h) !important;
+    }
+
+    .btn-secondary:active,
+    .btn-outline-secondary:active,
+    .btn-secondary:focus,
+    .btn-outline-secondary:focus {
+        background-color: var(--lilac-a) !important;
+        border-color: var(--lilac-a) !important;
+        box-shadow: 0 0 0 .2rem rgba(172,135,197,.25) !important;
+    }
+
+
+.btn-danger, .btn-outline-danger,
+.btn-info, .btn-outline-info,
+.btn-warning, .btn-outline-warning {
+    color: #fff !important;
+    background-color: var(--purple) !important;
+    border-color: var(--purple) !important;
+}
+
+    .btn-danger:hover, .btn-outline-danger:hover,
+    .btn-info:hover, .btn-outline-info:hover,
+    .btn-warning:hover, .btn-outline-warning:hover {
+        background-color: var(--purple-h) !important;
+        border-color: var(--purple-h) !important;
+    }
+
+    .btn-danger:active, .btn-outline-danger:active,
+    .btn-info:active, .btn-outline-info:active,
+    .btn-warning:active, .btn-outline-warning:active {
+        background-color: var(--purple-a) !important;
+        border-color: var(--purple-a) !important;
+    }
+
+
+.card-header,
+.card-header.bg-primary,
+.card-header.bg-info,
+.card-header.bg-danger {
+    background-image: linear-gradient(90deg, var(--purple-a), var(--lilac)) !important;
+    color: #fff !important;
+    border-bottom: 0 !important;
+}
+
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-accent-bg: rgba(172,135,197,.12);
+}
+
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--lilac) !important;
+    box-shadow: 0 0 0 .2rem rgba(172,135,197,.25) !important;
+}
+/* ==== tamniji tekst u listi narudžbi ==== */
+:root {
+    --text-strong: #1a1a1f;
+    --text-muted: #4b5563; 
+}
+
+/* glavni tekst u tablici */
+.table :is(tbody td, tbody th) {
+    color: var(--text-strong) !important;
+}
+
+/* naglašena imena i slični strong elementi */
+.table tbody .fw-semibold {
+    color: var(--text-strong) !important;
+}
+
+/* sekundarni redci (telefon, adresa, “muted”) */
+.table tbody .small,
+.table tbody .text-muted {
+    color: var(--text-muted) !important;
+}
