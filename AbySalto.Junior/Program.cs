@@ -45,7 +45,7 @@ namespace AbySalto.Junior
 
             app.UseStaticFiles();
 
-            app.MapControllers();
+           
 
             if (app.Environment.IsDevelopment())
             {
